@@ -7,6 +7,5 @@ This repository contains a collection of automated workflows leveraging AI agent
 - Customer feedback collection and response automation with Formbricks
 
 Each workflow folder contains:
-- A detailed description (`README.md`)
 - Step-by-step node notes (`notes.md`)
 - Optional workflow diagrams
