@@ -1,0 +1,449 @@
+{
+  "name": "RAG-Based AI Support Automation Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -352,
+        496
+      ],
+      "id": "3e5da1db-9c79-4105-81d0-ab2e2caed3b0",
+      "name": "When chat message received",
+      "webhookId": "2f15955b-74ca-46f7-80d6-c42ea21ef01c"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful assistant designed to answer questions based on the information provided through embedded documents. Your responses should rely solely on the content stored in the system. If a question falls outside the scope of the available data, politely inform the user that your knowledge is limited to the uploaded materials and your response have to start with \"i'm sorry\".\n",
+          "enableStreaming": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        64,
+        496
+      ],
+      "id": "be262e03-4c5c-42a1-9a74-f687dd47e86d",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        640
+      ],
+      "id": "d2246549-eb1c-427b-923c-ed668db663ea",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        64,
+        640
+      ],
+      "id": "5fd0bb46-fb24-471f-8328-6fb240e2d031",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        48,
+        768
+      ],
+      "id": "a48522a2-f689-4703-95fe-09b6698f9c28",
+      "name": "Embeddings Google Gemini1"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "use this tool to search for ",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        176,
+        656
+      ],
+      "id": "b31c9171-673b-46d9-b73c-bc7e25dfb0aa",
+      "name": "Supabase Vector Store2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a163ff1e-f04e-4495-9cf0-f87e6d27890f",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "i'm sorry",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        496
+      ],
+      "id": "11441869-3cf2-4931-a7cb-ea2484867064",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "description": "=Titolo del ticket: richiesta registrata\n\nDettagli:\n- Messaggio utente: {{ $('When chat message received').item.json.chatInput }}\n- Data/Ora: {{ $now }}",
+        "jsonParameters": true,
+        "additionalFieldsJson": "={\n  \"ticket\": {\n    \"subject\": \"richiesta registrata\",\n    \"description\": \"Messaggio utente: {{ $('When chat message received').item.json.chatInput }} | Data/Ora: {{ $now }}\"\n  }\n}\n\n"
+      },
+      "type": "n8n-nodes-base.zendesk",
+      "typeVersion": 1,
+      "position": [
+        656,
+        352
+      ],
+      "id": "a7bdc913-9bd1-4137-8221-e54e664053c3",
+      "name": "Create a ticket"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1218cbqjQ5443N03eV8ojvOae_EJ4AhOO",
+          "mode": "list",
+          "cachedResultName": "NOWHERE ALL DAY.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1218cbqjQ5443N03eV8ojvOae_EJ4AhOO/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -64,
+        -176
+      ],
+      "id": "010683c4-bd85-45c7-a180-d84a2af92099",
+      "name": "Download file1"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        -176
+      ],
+      "id": "4403c92b-ec7b-430d-a5a0-e10ab468a571",
+      "name": "Supabase Vector Store3"
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        64
+      ],
+      "id": "b51e7540-33b4-41b8-b4f1-1087c0483238",
+      "name": "Default Data Loader1"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        64,
+        80
+      ],
+      "id": "4ce19761-3a49-4801-9865-0ea1db8dc269",
+      "name": "Embeddings Google Gemini2"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        704,
+        704
+      ],
+      "id": "101905e3-bd06-443e-a6d5-164803c3b88c",
+      "name": "Create a record"
+    },
+    {
+      "parameters": {
+        "content": "## Dowloading File \nFile is downloaded and uploaded to Supabase",
+        "height": 480,
+        "width": 752
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -304,
+        -256
+      ],
+      "typeVersion": 1,
+      "id": "5f162698-2745-497b-a61a-ea327ad89578",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "##  Chat Trigger\nThis node starts the workflow whenever a user sends a message to the AI chatbot.\nIt acts as the entry point of the system and captures the user query to be processed in the following steps.",
+        "height": 304,
+        "width": 432,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -528,
+        352
+      ],
+      "typeVersion": 1,
+      "id": "f029aa6e-6914-419a-88f5-29405109253b",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## AI Agent – Response Generation\nThis node processes the user query using the retrieved documentation as context.\nThe AI agent is configured to answer exclusively based on the provided documents on Supabase and to avoid generating information outside the allowed knowledge base. It has a memory to remember the conversation.",
+        "height": 592,
+        "width": 528,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -96,
+        320
+      ],
+      "typeVersion": 1,
+      "id": "4eea37de-8d3e-436a-b633-ffe19fed0146",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Airtable – Log Conversation\nThis node records every interaction between the user and the chatbot in Airtable.\nIt stores the user question, AI response, timestamp, and status to maintain a structured history of all conversations.",
+        "height": 320,
+        "width": 400,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        672,
+        544
+      ],
+      "typeVersion": 1,
+      "id": "ed940c1c-159d-4000-a219-cf85f4db96b4",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Zendesk – Create Support Ticket\nWhen a knowledge gap or error is detected, this node automatically creates a support ticket in Zendesk.\nIt forwards the user query and context to the support team for further analysis and potential documentation updates.",
+        "height": 336,
+        "width": 400,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        592,
+        176
+      ],
+      "typeVersion": 1,
+      "id": "2a00d912-0a1c-47cd-b0f0-f5beb86e5196",
+      "name": "Sticky Note4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store2",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store2": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Create a ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file1": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader1": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store3",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store3",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "ff148a53-7a4e-49a0-9649-ffd6fc074172",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a920456940ba2d4cb138b883aee61bfd6c28041768acbb118c371c904f4aa217"
+  },
+  "id": "mwQfO8cpyU03nc-v7EcjC",
+  "tags": []
+}

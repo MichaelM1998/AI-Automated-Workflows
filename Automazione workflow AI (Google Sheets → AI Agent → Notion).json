@@ -1,0 +1,282 @@
+{
+  "name": "Automazione workflow AI (Google Sheets → AI Agent → Notion)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d336c0d2-48ce-4edb-8706-f498dc79352f",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "18B8lEPhzck5-N_DlKE4tgJ-JRPfC3zYvdC9wmuT-SS0",
+          "mode": "list",
+          "cachedResultName": "Foglio di lavoro senza nome",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18B8lEPhzck5-N_DlKE4tgJ-JRPfC3zYvdC9wmuT-SS0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/18B8lEPhzck5-N_DlKE4tgJ-JRPfC3zYvdC9wmuT-SS0/edit#gid=0https://docs.google.com/spreadsheets/d/18B8lEPhzck5-N_DlKE4tgJ-JRPfC3zYvdC9wmuT-SS0/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "cf8d156f-9f03-4e5b-9a2f-ee0fcf1c7ade",
+      "name": "Get row(s) in sheet"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "95305776-032a-4cd8-83e2-8a22d3dd7e8e",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Get row(s) in sheet').item.json.prova }}",
+        "options": {
+          "systemMessage": "Ruolo dell’agente:\nAgisci come uno scrittore e ricercatore esperto di letteratura per ragazzi, specializzato in analisi e narrazione di personaggi fiabeschi. Il tuo stile è accessibile, coinvolgente e adatto a un pubblico generale (genitori, insegnanti, studenti, lettori curiosi).\n\nMansione da svolgere:\nScrivi articoli informativi e narrativi su singoli personaggi \nTutto ciò molto breve, massimo 200 parole! "
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        16
+      ],
+      "id": "62aabe3f-f56b-4ba8-ad0f-a833a92d2eb2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1584,
+        16
+      ],
+      "id": "dcaaf8f2-047d-4460-b2ba-aa558c6932c9",
+      "name": "Wait",
+      "webhookId": "de2e90ce-e997-4b8c-a0f8-7f55546005d0"
+    },
+    {
+      "parameters": {
+        "pageId": {
+          "__rl": true,
+          "value": "https://www.notion.so/2805fcfb736f80759d39e1858a798a37?source=copy_link",
+          "mode": "url"
+        },
+        "title": "personaggi famosi",
+        "simple": false,
+        "blockUi": {
+          "blockValues": [
+            {
+              "textContent": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        976,
+        16
+      ],
+      "id": "42695a81-32a0-4839-8f54-5bcb3b5c381e",
+      "name": "Create a page"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        496,
+        224
+      ],
+      "id": "f82c38ee-a94f-4377-8fb7-cef60e492a24",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "content": "## Node: Trigger\n**This node automatically starts the workflow at a predefined time.\nIt acts as a scheduled time-based trigger and ensures periodic execution without manual intervention.**",
+        "height": 304,
+        "width": 304
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -144,
+        -176
+      ],
+      "typeVersion": 1,
+      "id": "4ac40f1b-ac91-44f6-b5de-3e97c7f27c10",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Node: Google Sheets – Get Rows\n**This node connects to the configured Google Sheets file and retrieves the rows containing the data to be processed.** ",
+        "height": 384,
+        "width": 208,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        160,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "7554db39-b3f4-4432-8d97-3884381ab9f8",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Node: AI Agent – Data Processing\n**This node sends the selected data to the AI agent for intelligent processing.\nThe AI analyzes the input, transforms it into structured text, and generates an output ready to be converted into a Notion page.** ",
+        "height": 368,
+        "width": 336
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        576,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "2569a893-7946-414c-b374-36941e4d6693",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Notion – Create Page \n**This node automatically creates a new page inside Notion using the processed data.\nThe page is generated with a predefined structure and layout, allowing organized information management without manual effort.**",
+        "height": 320,
+        "width": 368
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        944,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "b33f430e-df8a-4d84-a976-1b66beef6895",
+      "name": "Sticky Note3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Create a page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a page": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "6f8554ae-2985-400c-9c64-4cba3eae7b66",
+  "meta": {
+    "instanceId": "a920456940ba2d4cb138b883aee61bfd6c28041768acbb118c371c904f4aa217"
+  },
+  "id": "48zt6Oiso-gim714ULqaa",
+  "tags": []
+}

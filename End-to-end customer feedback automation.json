@@ -1,0 +1,662 @@
+{
+  "name": "End-to-end customer feedback automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "88662ae9-3ecb-47e9-bde5-62b882361285",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1520,
+        624
+      ],
+      "id": "1d708d73-efb9-45a8-9ee4-38dcb60adebb",
+      "name": "Webhook",
+      "webhookId": "88662ae9-3ecb-47e9-bde5-62b882361285"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "55d025ab-1e53-46db-b3df-110e434a961f",
+              "name": "Nazione",
+              "value": "={{ $json.body.data.data.Nazione[5] }}",
+              "type": "string"
+            },
+            {
+              "id": "43d2d10c-dbd0-4a3a-a212-34374b75d8d4",
+              "name": "Nome",
+              "value": "={{ $json.body.data.data.Contatti[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "9cfccdde-3165-487b-83bd-31c26260b495",
+              "name": "Cognome",
+              "value": "={{ $json.body.data.data.Contatti[1] }}",
+              "type": "string"
+            },
+            {
+              "id": "b67b9c82-d9dd-4b19-abd8-8279622dcf4d",
+              "name": "Mail",
+              "value": "={{ $json.body.data.data.Contatti[2] }}",
+              "type": "string"
+            },
+            {
+              "id": "d1fcacec-2b3b-49cc-8447-7de9b19f1f8b",
+              "name": "Interesse",
+              "value": "={{ $json.body.data.data.Interesse }}",
+              "type": "string"
+            },
+            {
+              "id": "c0f686be-4126-4513-94f1-76d62945db96",
+              "name": "Budget",
+              "value": "={{ $json.body.data.data.Budget }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1280,
+        624
+      ],
+      "id": "fd02342d-3402-4075-ba93-479393877493",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.Interesse }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.sentimentAnalysis",
+      "typeVersion": 1.1,
+      "position": [
+        -1056,
+        608
+      ],
+      "id": "6c9152a6-1343-4363-9d0b-4ef65a231f2f",
+      "name": "Sentiment Analysis"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -912,
+        784
+      ],
+      "id": "ea5d1286-f0ce-4c0f-97c4-57c7998aae18",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Genera il solo corpo di una breve e cortese email di risposta al messaggio {{ $json.Interesse }} di un utente che ha contattato l'azienda, ma la cui richiesta non è considerata interessante o non rientra nel nostro ambito di interesse ma che comunque va gestita in modo professionale essendo un feedback negativo; per questo andrà detto all'utente che lo faremo contattare per cercare di capire il problema e aiutarlo a risolverlo.\n\nTono: Professionale, equilibrato e non eccessivamente accondiscendente. Il messaggio deve essere grato per il contatto ma deve chiudere gentilmente la conversazione senza lasciare spazio a ulteriori follow-up per questa specifica richiesta.\n\nInizia con: \"Gentile {{ $json.Nome }},\"\nConcludi firmando come \"Ufficio commerciale\"\nObiettivo: Riconoscere la comunicazione, ringraziare per l'interesse/il tempo, e comunicare diplomaticamente che al momento non possiamo dare seguito alla richiesta.\n\nEsempio di Output che l'Agente AI dovrebbe generare:\nGentile {{ $json.Nome }},\n\nLa ringraziamo per averci contattato e per il tempo che ci ha dedicato nel presentarci la sua richiesta.\n\nAbbiamo esaminato attentamente il suo messaggio; tuttavia, in questo momento, la sua proposta/richiesta non rientra tra le nostre priorità attuali o non si allinea perfettamente con i nostri obiettivi strategici.\n\nLe auguriamo un grande successo per le sue iniziative future.\n\nCordiali saluti,\n\nUfficio commerciale",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -336,
+        816
+      ],
+      "id": "f09e2474-3d1d-4b57-9762-5fefc3f428c1",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        1008
+      ],
+      "id": "12edc3cb-f20f-49e7-aa6e-55a00ba968a2",
+      "name": "Google Gemini Chat Model1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        720
+      ],
+      "id": "fb3d829f-1381-44e6-a534-7ae8d0e67aa6",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        112,
+        832
+      ],
+      "id": "8efc4204-439f-4980-a396-154ada8a59ea",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields').item.json.Mail }}",
+        "subject": "=Risposta",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        304,
+        832
+      ],
+      "id": "0e5967b8-2aa5-4fce-a64e-a22ca8017e1f",
+      "name": "Send a message",
+      "webhookId": "4bf846aa-efee-487a-8d7a-68e0816b4420"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        496
+      ],
+      "id": "cb645b04-5f08-42b0-a682-b4c295a89adc",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Scrivi una breve email di cortesia professionale da inviare a un potenziale cliente che, dopo aver compilato una survey, ha mostrato grande interesse per il nostro business.\n\nL’email deve:\n\nEssere breve (massimo 80–100 parole)\n\nAvere un tono positivo, cordiale e professionale\n\nRingraziare il cliente per il tempo dedicato\n\nMostrare entusiasmo e apprezzamento per il suo interesse\n\nInvitare il cliente a restare aggiornato sulle novità o seguire i prossimi sviluppi del business\n\nConcludersi con un saluto gentile\n\nOutput richiesto:\nNON DEFINIRE L'OGGETTO DELLA MAIL MA SOLO ED UNICAMENTE IL TESTO SENZA COMMENTI AGGIUNTIVI. INIZIA L'EMAIL CON \"Cordiale {{ $json.Nome + ' ' + $json.Cognome }},\"\nScrivi in lingua italiana.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -320,
+        368
+      ],
+      "id": "74b12b03-224a-4944-9943-c1b0743759fb",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        544
+      ],
+      "id": "c2b4c20d-6df8-4a09-9cd4-df4e811cd89c",
+      "name": "Google Gemini Chat Model2"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        96,
+        384
+      ],
+      "id": "d64c9a69-8735-43e1-9ef9-3166f40107a0",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "={{ $json.Mail }}",
+        "subject": "Grazie per il tuo Feedback",
+        "message": "={{ $json.output }}",
+        "approvalOptions": {
+          "values": {
+            "approveLabel": "Clicca qui!"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        288,
+        384
+      ],
+      "id": "8019579d-abd1-46bf-ac9c-2be7e4dff1ce",
+      "name": "Send message and wait for response",
+      "webhookId": "5adce2f1-e1f9-459a-a839-2007b77dca54"
+    },
+    {
+      "parameters": {
+        "description": "={{ $('Merge1').item.json.sentimentAnalysis.category }}\n{{ $('Merge1').item.json.Interesse }}\n\n    \"email\": \"{{ $('Edit Fields').item.json.Mail }}\",\n    \"name\": \"{{ $('Edit Fields').item.json.Nome }}\"\n    \"Surname\": \"{{ $('Edit Fields').item.json.Cognome }}\n}\n}",
+        "jsonParameters": true,
+        "additionalFieldsJson": "={\n  \"requester\": {\n    \"email\": \"{{ $('Edit Fields').item.json.Mail }}\",\n    \"name\": \"{{ $('Edit Fields').item.json.Nome }}\"\n  }\n}"
+      },
+      "type": "n8n-nodes-base.zendesk",
+      "typeVersion": 1,
+      "position": [
+        528,
+        384
+      ],
+      "id": "dcbc5b7e-74fa-4e96-be2b-3e5abad84508",
+      "name": "Create a ticket"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09G9EY3FFS",
+          "mode": "list",
+          "cachedResultName": "nuovo-canale"
+        },
+        "text": "Ti è arrivato un ticket!",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        784,
+        384
+      ],
+      "id": "dcce5200-7110-4281-97c2-46d4145d5042",
+      "name": "Send a message1",
+      "webhookId": "d897d51d-3b1c-4ac2-839e-f12fdf38143c"
+    },
+    {
+      "parameters": {
+        "content": "## Webhook – Form Submission\nThis node captures survey responses submitted via Formbricks.\nIt acts as the entry point of the workflow, triggering the process whenever a potential customer submits feedback.",
+        "height": 384,
+        "width": 400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1696,
+        432
+      ],
+      "typeVersion": 1,
+      "id": "2ddfb368-2c09-427e-bddd-c89c66d93342",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Sentiment Analysis\nThis node analyzes the sentiment of the survey response to determine whether the feedback is positive or negative.\nIt provides structured data for decision-making in the following steps.",
+        "height": 576,
+        "width": 320,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1104,
+        400
+      ],
+      "typeVersion": 1,
+      "id": "1f52d432-b78f-41dd-8aa4-f008d67d42be",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## AI Agent – Email Generation\nFor positive feedback, this AI agent generates a personalized thank-you email encouraging the customer to stay updated.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFor negative feedback, it generates an apology email and informs the customer that someone will contact them to address the issue.",
+        "height": 912,
+        "width": 544,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -448,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "c528ea90-2031-4705-9d76-b2c2cb5620ed",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Slack Notification\n",
+        "height": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        720,
+        320
+      ],
+      "typeVersion": 1,
+      "id": "aae1b080-349d-4334-b73d-50f8fb3e86fa",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Zendesk – Ticket Creation",
+        "height": 288,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        512,
+        272
+      ],
+      "typeVersion": 1,
+      "id": "8bb4fe24-acbd-48d6-b065-9fc19604ce86",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Email Delivery",
+        "height": 784,
+        "width": 288
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        208,
+        240
+      ],
+      "typeVersion": 1,
+      "id": "0e9b9128-a848-4f8d-83f1-31a82d2f4c7a",
+      "name": "Sticky Note5"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "mikiformbricks.app.n8n.cloud",
+            "user-agent": "node",
+            "content-length": "882",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "*",
+            "baggage": "sentry-environment=production,sentry-release=4.1.0,sentry-public_key=f04fb0e18badd6412c9671e4b59b27ab,sentry-trace_id=8d21fe78c2537b84dae62b2bd78a239e,sentry-org_id=4504315602993152,sentry-sampled=false,sentry-sample_rand=0.9688521574330469,sentry-sample_rate=0",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "3.64.29.144",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "DE",
+            "cf-ray": "99851c9a31db1e10-FRA",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "application/json",
+            "sec-fetch-mode": "cors",
+            "sentry-trace": "8d21fe78c2537b84dae62b2bd78a239e-3411bc5be542d023-0",
+            "x-forwarded-for": "3.64.29.144, 172.70.246.132",
+            "x-forwarded-host": "mikiformbricks.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-48-784fb87cf5-d9tb2",
+            "x-is-trusted": "yes",
+            "x-real-ip": "3.64.29.144"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "webhookId": "cmhhuuebb4ek1ad016q0dwejf",
+            "event": "responseFinished",
+            "data": {
+              "id": "cmhhy0gln1o0kad01rop4hm9y",
+              "createdAt": "2025-11-02T16:46:03.275Z",
+              "updatedAt": "2025-11-02T16:47:05.073Z",
+              "surveyId": "cmhhs1hpo1avlad01dhpjmssq",
+              "displayId": "cmhhy0ewu1o0had01i1yhjk4v",
+              "contact": null,
+              "contactAttributes": null,
+              "finished": true,
+              "endingId": "xjt9rtd6m5xp2f3ajtmgy0k5",
+              "data": {
+                "Budget": "-1",
+                "Nazione": [
+                  "",
+                  "",
+                  "",
+                  "",
+                  "",
+                  "Nigeria"
+                ],
+                "Contatti": [
+                  "Michael",
+                  "Mirabella",
+                  "Mikimirabella58@gmail.com",
+                  "",
+                  ""
+                ],
+                "Interesse": "Mi piacciono le vostre penne",
+                "welcomeCard": "clicked"
+              },
+              "variables": {},
+              "ttc": {
+                "Budget": 5743.40000000596,
+                "_total": 60220,
+                "Nazione": 9456.699999988079,
+                "Contatti": 20074.40000000596,
+                "Interesse": 24945.5
+              },
+              "tags": [],
+              "meta": {
+                "url": "https://app.formbricks.com/s/cmhhs1hpo1avlad01dhpjmssq",
+                "userAgent": {
+                  "browser": "Chrome",
+                  "os": "Windows",
+                  "device": "desktop"
+                }
+              },
+              "singleUseId": null,
+              "language": null
+            }
+          },
+          "webhookUrl": "https://mikiformbricks.app.n8n.cloud/webhook/88662ae9-3ecb-47e9-bde5-62b882361285",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Sentiment Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Sentiment Analysis",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sentiment Analysis": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Send message and wait for response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "Create a ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a ticket": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "7cbe01d0-2fd0-4830-ba64-1aa3825fd993",
+  "meta": {
+    "instanceId": "a920456940ba2d4cb138b883aee61bfd6c28041768acbb118c371c904f4aa217"
+  },
+  "id": "Tl20DoItVL2rnHG9ilO3_",
+  "tags": []
+}
